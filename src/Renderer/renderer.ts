@@ -9,7 +9,7 @@ export default class Renderer {
     private textures: { [key: string]: Texture } = {};
     private attributes: { [name: string]: AttribLocation } = {};
     private uniforms: { [name: string]: UniformLocation } = {};
-private bufferData: BufferData = new BufferData(1000000, { autoClearOnValueOf: true });
+    private bufferData: BufferData = new BufferData(1000000, { autoClearOnValueOf: true });
 
     constructor(gl: WebGLRenderingContext, vsource: string, fsource: string) {
         this.gl = gl;
@@ -123,10 +123,7 @@ private bufferData: BufferData = new BufferData(1000000, { autoClearOnValueOf: t
 
     public useTexture(name: string) {
         if (!this.textures[name]) {
-            // const texture = this.textures['pixel'];
-            // this.gl.bindTexture(this.gl.TEXTURE_2D, texture.valueOf());
             throw new Error(`[ERROR] Texture{${name}} does not exist`);
-            // return;
         }
         const texture = this.textures[name];
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture.valueOf());
