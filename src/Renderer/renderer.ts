@@ -23,10 +23,17 @@ export default class Renderer {
     }
 
     private setup() {
-        this.createTexture('./src/Renderer/base/pixel.png', 'pixel');
+        this.createTexture({ src: './src/Renderer/base/pixel.png', name: 'pixel' });
 
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+
+
+        this.addAttribute('a_position', 2, 0, 28);
+        this.addAttribute('a_color', 3, 8, 28);
+        this.addAttribute('a_texCoord', 2, 20, 28);
+        this.addUniform('u_resolution', [this.gl.canvas.width, this.gl.canvas.height]);
+        this.addUniform('u_texture', [0]);
     }
 
     private bindBuffer(buffer: WebGLBuffer) {
@@ -78,6 +85,16 @@ export default class Renderer {
         fshaderInfoLog && console.log(fshaderInfoLog);
     }
 
+    public loadTextures(textures: { name: string, src: string }[], callback: () => void) {
+        Promise.all(
+            textures.map(val => this.createTexture(val))
+        ).then(() => {
+            callback();
+        }).catch(() => {
+            throw new Error('[ERROR] Texture could not be loaded');
+        });
+    }
+
     public addAttribute(name: string, size: number, offset: number, stride: number) {
         this.attributes[name] = new AttribLocation({
             gl: this.gl,
@@ -98,21 +115,27 @@ export default class Renderer {
         });
     }
 
-    public createTexture(src: string, name: string) {
-        const img = new Image();
-        img.onload = () => {
-            const { width, height } = { width: img.width, height: img.height };
+    public createTexture({ src, name }: { src: string, name: string }) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const { width, height } = { width: img.width, height: img.height };
 
-            this.textures[name] = new Texture({
-                gl: this.gl,
-                height,
-                width,
-                src,
-                image: img,
-            });
-        }
+                this.textures[name] = new Texture({
+                    gl: this.gl,
+                    height,
+                    width,
+                    src,
+                    image: img,
+                });
 
-        img.src = src;
+                resolve(true);
+            }
+
+            img.onerror = () => reject(false);
+
+            img.src = src;
+        });
     }
 
     public getGL() {
