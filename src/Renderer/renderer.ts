@@ -2,6 +2,8 @@ import { AttribLocation, UniformLocation } from "./location";
 import Texture from "./texture";
 import BufferData from './buffer_data';
 
+import { vSource, fSource } from "./shaders";
+
 export default class Renderer {
     private gl: WebGLRenderingContext;
     private program: WebGLProgram;
@@ -11,10 +13,10 @@ export default class Renderer {
     private uniforms: { [name: string]: UniformLocation } = {};
     private bufferData: BufferData = new BufferData(10000, { autoClearOnValueOf: true });
 
-    constructor(gl: WebGLRenderingContext, vsource: string, fsource: string) {
+    constructor(gl: WebGLRenderingContext) {
         this.gl = gl;
         this.program = this.createProgram();
-        this.createShaders(this.program, vsource, fsource);
+        this.createShaders(this.program, vSource, fSource);
         this.buffer = this.createBuffer();
         this.bindBuffer(this.buffer);
         this.setup();
@@ -49,7 +51,7 @@ export default class Renderer {
         return buffer;
     }
 
-    private createShaders(program: WebGLProgram, vsource: string, fsource: string) {
+    private createShaders(program: WebGLProgram, vSource: string, fSource: string) {
         const fshader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
         const vshader = this.gl.createShader(this.gl.VERTEX_SHADER);
 
@@ -57,8 +59,8 @@ export default class Renderer {
             throw new Error('[ERROR] There appears to be a problem creating shaders');
         }
 
-        this.gl.shaderSource(vshader, vsource);
-        this.gl.shaderSource(fshader, fsource);
+        this.gl.shaderSource(vshader, vSource);
+        this.gl.shaderSource(fshader, fSource);
 
         this.gl.compileShader(vshader);
         this.gl.compileShader(fshader);
