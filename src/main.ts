@@ -1,6 +1,7 @@
 import './style.css';
 
-import Renderer from './Renderer';
+import Renderer, { Geometry, TexturedRectangle } from './Renderer';
+import Scene from './Renderer/scene/Scene';
 
 const canvas = document.createElement('canvas');
 canvas.width = window.innerWidth;

@@ -1,1 +1,1 @@
-export { Rectangle, TexturedRectangle } from './geometry';
+export * from './geometry';
