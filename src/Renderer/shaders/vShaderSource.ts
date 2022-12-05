@@ -14,7 +14,7 @@ void main() {
     v_color = a_color;
     v_texCoord = a_texCoord;
 
-    vec2 vec_pos = a_position / u_resolution;
+    vec2 vec_pos = a_position / u_resolution * 2.0;
     
     gl_Position = vec4(vec_pos, 0.0, 1.0);
 }
