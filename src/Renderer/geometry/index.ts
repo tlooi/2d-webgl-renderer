@@ -1,0 +1,1 @@
+export { Rectangle, TexturedRectangle } from './geometry';
