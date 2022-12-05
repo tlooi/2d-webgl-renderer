@@ -28,11 +28,13 @@ export default class BufferData {
         this.length = 0;
     }
 
-    public valueOf() {
+    public valueOf(): [number, Float32Array] {
+        let length = this.length;
+
         if (this.options.autoClearOnValueOf) {
             this.clear();
         }
 
-        return this.buffer;
+        return [length, this.buffer];
     }
 }

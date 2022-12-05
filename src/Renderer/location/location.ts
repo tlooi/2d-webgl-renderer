@@ -64,7 +64,8 @@ export class UniformLocation extends WebGLLocation {
     public setValue(...values: number[]) {
         switch (values.length) {
             case 1:
-                this.gl.uniform1fv(this.location, values);
+                // this.gl.uniform1fv(this.location, values);
+                this.gl.uniform1iv(this.location, values);
                 break;
             case 2:
                 this.gl.uniform2fv(this.location, values);

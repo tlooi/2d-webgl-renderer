@@ -9,7 +9,7 @@ export default class Renderer {
     private textures: { [key: string]: Texture } = {};
     private attributes: { [name: string]: AttribLocation } = {};
     private uniforms: { [name: string]: UniformLocation } = {};
-    private bufferData: BufferData = new BufferData(1000000, { autoClearOnValueOf: true });
+    private bufferData: BufferData = new BufferData(10000, { autoClearOnValueOf: true });
 
     constructor(gl: WebGLRenderingContext, vsource: string, fsource: string) {
         this.gl = gl;
@@ -117,6 +117,10 @@ export default class Renderer {
         return this.gl;
     }
 
+    public getBufferData() {
+        return this.bufferData;
+    }
+
     public getTextures() {
         return this.textures;
     }
@@ -142,10 +146,11 @@ export default class Renderer {
             -120 * 8, -80 * 8, 1, 1, 1, 0, 1
         );
 
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.bufferData.valueOf(), this.gl.STATIC_DRAW);
+        let [length, data] = this.bufferData.valueOf();
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
 
         this.useTexture('BLDtutorial');
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, length / 7);
 
         this.useTexture('world');
         this.bufferData.add(
@@ -157,11 +162,13 @@ export default class Renderer {
             256, -256, 1, 1, 1, 1, 1,
             -256, -256, 1, 1, 1, 0, 1
         );
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.bufferData.valueOf(), this.gl.STATIC_DRAW);
+
+        [length, data] = this.bufferData.valueOf();
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
 
         console.log(this.bufferData);
-        this.uniforms['u_texture']?.setValue(0);
+        console.log(this.uniforms);
 
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, length / 7);
     }
 }
