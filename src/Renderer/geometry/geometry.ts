@@ -83,7 +83,7 @@ export class TexturedRectangle extends TexturedGeometry {
     private width: number;
     private height: number;
     protected bounds: TBounds;
-    protected textureName: string = 'world';
+    protected textureName: string;
 
     constructor(x: number, y: number, width: number, height: number, textureName: string) {
         super(x, y);
@@ -91,6 +91,8 @@ export class TexturedRectangle extends TexturedGeometry {
         this.width = width;
         this.height = height;
 
+        this.textureName = textureName;
+        
         this.bounds = [
             [this.x - this.width / 2, this.y + this.height / 2],
             [this.x + this.width / 2, this.y + this.height / 2],
