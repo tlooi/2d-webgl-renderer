@@ -3,10 +3,11 @@ import { AttribLocation, UniformLocation } from "./location";
 import Texture from "./texture";
 
 import { fSource, vSource } from "./shaders";
+import { AnimatedSprite, Sprite } from './sprite/sprite';
 
 type TPair = [number, number];
 
-type TBounds = [TPair, TPair, TPair, TPair];
+export type TBounds = [TPair, TPair, TPair, TPair];
 
 export default class Renderer {
     private gl: WebGLRenderingContext;
@@ -31,7 +32,7 @@ export default class Renderer {
 
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-
+        this.gl.clearColor(0.2, 0.7, 0.3, 1.0)
 
         this.addAttribute('a_position', 2, 0, 28);
         this.addAttribute('a_color', 3, 8, 28);
@@ -168,10 +169,14 @@ export default class Renderer {
             x + width / 2, y + height / 2, 1, 1, 1, 1, 0,
             x + width / 2, y - height / 2, 1, 1, 1, 1, 1,
 
-            x - width / 2, y + height / 2, 1, 1, 1, 0, 0,
+            x - width / 2, y + height / 2, 1, 1, 1, 1, 0,
             x + width / 2, y - height / 2, 1, 1, 1, 1, 1,
             x - width / 2, y - height / 2, 1, 1, 1, 0, 1
         );
+    }
+
+    public clearScreen() {
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     }
 
     public drawTextureUV(x: number, y: number, width: number, height: number, bounds: TBounds) {
@@ -181,35 +186,76 @@ export default class Renderer {
             x + width / 2, y - height / 2, 1, 1, 1, bounds[2][0], bounds[2][1],
 
             x - width / 2, y + height / 2, 1, 1, 1, bounds[0][0], bounds[0][1],
-            x + width / 2, y - height / 2, 1, 1, 1, bounds[2][1], bounds[2][1],
+            x + width / 2, y - height / 2, 1, 1, 1, bounds[2][0], bounds[2][1],
             x - width / 2, y - height / 2, 1, 1, 1, bounds[3][0], bounds[3][1]
         );
     }
 
+    public drawSprite(sprite: AnimatedSprite) {
+        const { x, y, width, height } = sprite.getRenderLocation();
+        const bounds = sprite.getBounds();
+
+        this.bufferData.add(
+            x - width / 2, y + height / 2, 1, 1, 1, bounds[0][0], bounds[0][1],
+            x + width / 2, y + height / 2, 1, 1, 1, bounds[1][0], bounds[1][1],
+            x + width / 2, y - height / 2, 1, 1, 1, bounds[2][0], bounds[2][1],
+
+            x - width / 2, y + height / 2, 1, 1, 1, bounds[0][0], bounds[0][1],
+            x + width / 2, y - height / 2, 1, 1, 1, bounds[2][0], bounds[2][1],
+            x - width / 2, y - height / 2, 1, 1, 1, bounds[3][0], bounds[3][1]
+        );
+    }
+
+    public renderTempScene() {
+        {
+            // this.useTexture('BLDtutorial');
+
+            // this.drawTexture(0, 0, 240 * 8, 160 * 8);
+            // const [length, data] = this.bufferData.valueOf();
+            // this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
+            // this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
+        }
+
+        {
+            // this.useTexture('world');
+
+            // this.drawTexture(0, 0, 512, 512);
+            // const [length, data] = this.bufferData.valueOf();
+            // this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
+            // this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
+            // this.useTexture('pixel');
+            this.drawTextureUV(0, 0, 512, 512, [
+                [0.5, 0.25],
+                [0.75, 0.25],
+                [0.75, 0.5],
+                [0.5, 0.5]
+            ]);
+        }
+
+        {
+            this.useTexture('Bison');
+
+            this.drawTextureUV(400, 0, 90, 90, [
+                [0, 0],
+                [0.25, 0],
+                [0.25, 0.25],
+                [0, 0.25]
+            ]);
+
+            this.drawTextureUV(350, 0, 256, 256, [
+                [0.25, 0],
+                [0.55, 0],
+                [0.55, 0.25],
+                [0.25, 0.25]
+            ])
+            const [length, data] = this.bufferData.valueOf();
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
+        }
+    }
+
     public render() {
-        this.useTexture('BLDtutorial');
-
-        this.drawTexture(0, 0, 240 * 8, 160 * 8);
-        let [length, data] = this.bufferData.valueOf();
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
-
-        this.useTexture('world');
-
-        this.drawTexture(0, 0, 512, 512);
-        [length, data] = this.bufferData.valueOf();
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
-
-        this.useTexture('Bison');
-
-        this.drawTextureUV(0, 0, 512, 512, [
-            [0, 0],
-            [0.27, 0],
-            [0.27, 0.27],
-            [0, 0.27]
-        ]);
-        [length, data] = this.bufferData.valueOf();
+        const [length, data] = this.bufferData.valueOf();
         this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
         this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
     }
