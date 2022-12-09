@@ -16,6 +16,10 @@ export default class Texture {
     private texture: WebGLTexture;
 
     constructor({ gl, src, width, height, image }: ITextureConstructor) {
+        if (Texture.id > 7) {
+            throw new Error('[ERROR] Cannot have more than 8 textures');
+        }
+        
         this.src = src;
         this.width = width;
         this.height = height;

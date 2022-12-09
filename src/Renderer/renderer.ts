@@ -1,8 +1,12 @@
+import BufferData from './buffer_data';
 import { AttribLocation, UniformLocation } from "./location";
 import Texture from "./texture";
-import BufferData from './buffer_data';
 
-import { vSource, fSource } from "./shaders";
+import { fSource, vSource } from "./shaders";
+
+type TPair = [number, number];
+
+type TBounds = [TPair, TPair, TPair, TPair];
 
 export default class Renderer {
     private gl: WebGLRenderingContext;
@@ -11,7 +15,7 @@ export default class Renderer {
     private textures: { [key: string]: Texture } = {};
     private attributes: { [name: string]: AttribLocation } = {};
     private uniforms: { [name: string]: UniformLocation } = {};
-    private bufferData: BufferData = new BufferData(10000, { autoClearOnValueOf: true });
+    private bufferData: BufferData = new BufferData(10000, { autoClearOnValueOf: true, vertexLength: 7 });
 
     constructor(gl: WebGLRenderingContext) {
         this.gl = gl;
@@ -158,42 +162,55 @@ export default class Renderer {
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture.valueOf());
     }
 
-    public draw() {
-        this.uniforms['u_texture']?.setValue(0);
-
+    public drawTexture(x: number, y: number, width: number, height: number) {
         this.bufferData.add(
-            -120 * 8, 80 * 8, 1, 1, 1, 0, 0,
-            120 * 8, 80 * 8, 1, 1, 1, 1, 0,
-            120 * 8, -80 * 8, 1, 1, 1, 1, 1,
+            x - width / 2, y + height / 2, 1, 1, 1, 0, 0,
+            x + width / 2, y + height / 2, 1, 1, 1, 1, 0,
+            x + width / 2, y - height / 2, 1, 1, 1, 1, 1,
 
-            -120 * 8, 80 * 8, 1, 1, 1, 0, 0,
-            120 * 8, -80 * 8, 1, 1, 1, 1, 1,
-            -120 * 8, -80 * 8, 1, 1, 1, 0, 1
+            x - width / 2, y + height / 2, 1, 1, 1, 0, 0,
+            x + width / 2, y - height / 2, 1, 1, 1, 1, 1,
+            x - width / 2, y - height / 2, 1, 1, 1, 0, 1
         );
+    }
 
+    public drawTextureUV(x: number, y: number, width: number, height: number, bounds: TBounds) {
+        this.bufferData.add(
+            x - width / 2, y + height / 2, 1, 1, 1, bounds[0][0], bounds[0][1],
+            x + width / 2, y + height / 2, 1, 1, 1, bounds[1][0], bounds[1][1],
+            x + width / 2, y - height / 2, 1, 1, 1, bounds[2][0], bounds[2][1],
+
+            x - width / 2, y + height / 2, 1, 1, 1, bounds[0][0], bounds[0][1],
+            x + width / 2, y - height / 2, 1, 1, 1, bounds[2][1], bounds[2][1],
+            x - width / 2, y - height / 2, 1, 1, 1, bounds[3][0], bounds[3][1]
+        );
+    }
+
+    public render() {
+        this.useTexture('BLDtutorial');
+
+        this.drawTexture(0, 0, 240 * 8, 160 * 8);
         let [length, data] = this.bufferData.valueOf();
         this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
-
-        this.useTexture('BLDtutorial');
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, length / 7);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
 
         this.useTexture('world');
-        this.bufferData.add(
-            -256, 256, 1, 1, 1, 0, 0,
-            256, 256, 1, 1, 1, 1, 0,
-            256, -256, 1, 1, 1, 1, 1,
 
-            -256, 256, 1, 1, 1, 0, 0,
-            256, -256, 1, 1, 1, 1, 1,
-            -256, -256, 1, 1, 1, 0, 1
-        );
-
+        this.drawTexture(0, 0, 512, 512);
         [length, data] = this.bufferData.valueOf();
         this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
 
-        console.log(this.bufferData);
-        console.log(this.uniforms);
+        this.useTexture('Bison');
 
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, length / 7);
+        this.drawTextureUV(0, 0, 512, 512, [
+            [0, 0],
+            [0.27, 0],
+            [0.27, 0.27],
+            [0, 0.27]
+        ]);
+        [length, data] = this.bufferData.valueOf();
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
     }
 }

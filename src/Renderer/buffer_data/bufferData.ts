@@ -1,5 +1,6 @@
 interface IOptions {
-    autoClearOnValueOf: boolean
+    autoClearOnValueOf: boolean;
+    vertexLength: undefined | number;
 }
 
 export default class BufferData {
@@ -35,6 +36,10 @@ export default class BufferData {
             this.clear();
         }
 
+        if (this.options.vertexLength) {
+            return [length / this.options.vertexLength, this.buffer];
+        }
+        
         return [length, this.buffer];
     }
 }
