@@ -3,7 +3,7 @@ import { AttribLocation, UniformLocation } from "./location";
 import Texture from "./texture";
 
 import { fSource, vSource } from "./shaders";
-import { AnimatedSprite, Sprite } from './sprite/sprite';
+import { AnimatedSprite } from './sprite/sprite';
 
 type TPair = [number, number];
 
@@ -17,6 +17,7 @@ export default class Renderer {
     private attributes: { [name: string]: AttribLocation } = {};
     private uniforms: { [name: string]: UniformLocation } = {};
     private bufferData: BufferData = new BufferData(10000, { autoClearOnValueOf: true, vertexLength: 7 });
+    private textureBatch: { [texture: string]: BufferData } = {};
 
     constructor(gl: WebGLRenderingContext) {
         this.gl = gl;
@@ -32,7 +33,6 @@ export default class Renderer {
 
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-        this.gl.clearColor(0.2, 0.7, 0.3, 1.0)
 
         this.addAttribute('a_position', 2, 0, 28);
         this.addAttribute('a_color', 3, 8, 28);
@@ -121,6 +121,14 @@ export default class Renderer {
     }
 
     public createTexture({ src, name }: { src: string, name: string }) {
+        this.textureBatch[name] = new BufferData(
+            10000,
+            {
+                autoClearOnValueOf: true,
+                vertexLength: 7
+            }
+        );
+
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => {
@@ -163,13 +171,13 @@ export default class Renderer {
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture.valueOf());
     }
 
-    public drawTexture(x: number, y: number, width: number, height: number) {
-        this.bufferData.add(
+    public drawTexture(x: number, y: number, width: number, height: number, textureName: string) {
+        this.textureBatch[textureName].add(
             x - width / 2, y + height / 2, 1, 1, 1, 0, 0,
             x + width / 2, y + height / 2, 1, 1, 1, 1, 0,
             x + width / 2, y - height / 2, 1, 1, 1, 1, 1,
 
-            x - width / 2, y + height / 2, 1, 1, 1, 1, 0,
+            x - width / 2, y + height / 2, 1, 1, 1, 0, 0,
             x + width / 2, y - height / 2, 1, 1, 1, 1, 1,
             x - width / 2, y - height / 2, 1, 1, 1, 0, 1
         );
@@ -179,8 +187,8 @@ export default class Renderer {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     }
 
-    public drawTextureUV(x: number, y: number, width: number, height: number, bounds: TBounds) {
-        this.bufferData.add(
+    public drawTextureUV(x: number, y: number, width: number, height: number, textureName: string, bounds: TBounds) {
+        this.textureBatch[textureName].add(
             x - width / 2, y + height / 2, 1, 1, 1, bounds[0][0], bounds[0][1],
             x + width / 2, y + height / 2, 1, 1, 1, bounds[1][0], bounds[1][1],
             x + width / 2, y - height / 2, 1, 1, 1, bounds[2][0], bounds[2][1],
@@ -195,7 +203,7 @@ export default class Renderer {
         const { x, y, width, height } = sprite.getRenderLocation();
         const bounds = sprite.getBounds();
 
-        this.bufferData.add(
+        this.textureBatch[sprite.getTextureName()].add(
             x - width / 2, y + height / 2, 1, 1, 1, bounds[0][0], bounds[0][1],
             x + width / 2, y + height / 2, 1, 1, 1, bounds[1][0], bounds[1][1],
             x + width / 2, y - height / 2, 1, 1, 1, bounds[2][0], bounds[2][1],
@@ -224,7 +232,7 @@ export default class Renderer {
             // this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
             // this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
             // this.useTexture('pixel');
-            this.drawTextureUV(0, 0, 512, 512, [
+            this.drawTextureUV(0, 0, 512, 512, 'Bison', [
                 [0.5, 0.25],
                 [0.75, 0.25],
                 [0.75, 0.5],
@@ -235,14 +243,14 @@ export default class Renderer {
         {
             this.useTexture('Bison');
 
-            this.drawTextureUV(400, 0, 90, 90, [
+            this.drawTextureUV(400, 0, 90, 90, 'Bison', [
                 [0, 0],
                 [0.25, 0],
                 [0.25, 0.25],
                 [0, 0.25]
             ]);
 
-            this.drawTextureUV(350, 0, 256, 256, [
+            this.drawTextureUV(350, 0, 256, 256, 'Bison', [
                 [0.25, 0],
                 [0.55, 0],
                 [0.55, 0.25],
@@ -255,8 +263,12 @@ export default class Renderer {
     }
 
     public render() {
-        const [length, data] = this.bufferData.valueOf();
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
+        for (const texture in this.textureBatch) {
+            const [length, data] = this.textureBatch[texture].valueOf();
+
+            this.useTexture(texture);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
+        }
     }
 }

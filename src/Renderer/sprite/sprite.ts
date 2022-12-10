@@ -14,6 +14,7 @@ type TAnimationOptions = {
 
 // TODO
 export class Sprite {
+    
     public getBounds(): TBounds {
         return [
             [0, 0],
@@ -21,6 +22,10 @@ export class Sprite {
             [1, 1],
             [0, 1]
         ];
+    }
+
+    public getTextureName() {
+        return 'pixel';
     }
 }
 
@@ -80,5 +85,9 @@ export class AnimatedSprite extends Sprite {
             width: this.width,
             height: this.height
         }
+    }
+
+    public getTextureName(): string {
+        return this.options.textureName;
     }
 }

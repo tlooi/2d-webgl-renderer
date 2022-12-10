@@ -39,7 +39,7 @@ export default class BufferData {
         if (this.options.vertexLength) {
             return [length / this.options.vertexLength, this.buffer];
         }
-        
+
         return [length, this.buffer];
     }
 }
