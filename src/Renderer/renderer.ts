@@ -4,6 +4,7 @@ import Texture from "./texture";
 
 import { fSource, vSource } from "./shaders";
 import { AnimatedSprite } from './sprite/sprite';
+import texture from './texture';
 
 type TPair = [number, number];
 
@@ -169,6 +170,18 @@ export default class Renderer {
         }
         const texture = this.textures[name];
         this.gl.bindTexture(this.gl.TEXTURE_2D, texture.valueOf());
+    }
+
+    public draw({ x, y, width, height, textureName, color }: { x: number, y: number, width: number, height: number, textureName: string, color: [number, number, number] }) {
+        this.textureBatch[textureName].add(
+            x - width / 2, y + height / 2, ...color, 0, 0,
+            x + width / 2, y + height / 2, ...color, 1, 0,
+            x + width / 2, y - height / 2, ...color, 1, 1,
+
+            x - width / 2, y + height / 2, ...color, 0, 0,
+            x + width / 2, y - height / 2, ...color, 1, 1,
+            x - width / 2, y - height / 2, ...color, 0, 1
+        );
     }
 
     public drawTexture(x: number, y: number, width: number, height: number, textureName: string) {
