@@ -214,54 +214,6 @@ export default class Renderer {
         );
     }
 
-    public renderTempScene() {
-        {
-            // this.useTexture('BLDtutorial');
-
-            // this.drawTexture(0, 0, 240 * 8, 160 * 8);
-            // const [length, data] = this.bufferData.valueOf();
-            // this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
-            // this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
-        }
-
-        {
-            // this.useTexture('world');
-
-            // this.drawTexture(0, 0, 512, 512);
-            // const [length, data] = this.bufferData.valueOf();
-            // this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
-            // this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
-            // this.useTexture('pixel');
-            this.drawTextureUV(0, 0, 512, 512, 'Bison', [
-                [0.5, 0.25],
-                [0.75, 0.25],
-                [0.75, 0.5],
-                [0.5, 0.5]
-            ]);
-        }
-
-        {
-            this.useTexture('Bison');
-
-            this.drawTextureUV(400, 0, 90, 90, 'Bison', [
-                [0, 0],
-                [0.25, 0],
-                [0.25, 0.25],
-                [0, 0.25]
-            ]);
-
-            this.drawTextureUV(350, 0, 256, 256, 'Bison', [
-                [0.25, 0],
-                [0.55, 0],
-                [0.55, 0.25],
-                [0.25, 0.25]
-            ])
-            const [length, data] = this.bufferData.valueOf();
-            this.gl.bufferData(this.gl.ARRAY_BUFFER, data, this.gl.STATIC_DRAW);
-            this.gl.drawArrays(this.gl.TRIANGLES, 0, length);
-        }
-    }
-
     public render() {
         for (const texture in this.textureBatch) {
             const [length, data] = this.textureBatch[texture].valueOf();
